@@ -8,6 +8,7 @@
       "key": "literal:self",
       "record": {
         "type": "object",
+        "required": ["createdAt"],
         "properties": {
           "displayName": {
             "type": "string",
@@ -21,7 +22,11 @@
             "maxLength": 2560
           },
           "website": { "type": "string", "format": "uri" },
-          "createdAt": { "type": "string", "format": "datetime" }
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Client-declared timestamp when this account profile was originally created."
+          }
         }
       }
     }

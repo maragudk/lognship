@@ -1,0 +1,26 @@
+{
+  "lexicon": 1,
+  "id": "com.lognship.log.entry",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "Record containing a lognship log entry.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["text", "createdAt"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "The primary log entry content."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Client-declared timestamp when this log entry was originally created."
+          }
+        }
+      }
+    }
+  }
+}

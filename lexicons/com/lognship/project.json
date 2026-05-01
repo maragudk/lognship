@@ -1,0 +1,34 @@
+{
+  "lexicon": 1,
+  "id": "com.lognship.project",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A declaration of a lognship project.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["createdAt"],
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "maxGraphemes": 64,
+            "maxLength": 640
+          },
+          "description": {
+            "type": "string",
+            "description": "Free-form project description text.",
+            "maxGraphemes": 256,
+            "maxLength": 2560
+          },
+          "website": { "type": "string", "format": "uri" },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Client-declared timestamp when this project was originally created."
+          }
+        }
+      }
+    }
+  }
+}

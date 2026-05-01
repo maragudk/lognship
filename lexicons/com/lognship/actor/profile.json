@@ -1,0 +1,29 @@
+{
+  "lexicon": 1,
+  "id": "com.lognship.actor.profile",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A declaration of a lognship account profile.",
+      "key": "literal:self",
+      "record": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "maxGraphemes": 64,
+            "maxLength": 640
+          },
+          "description": {
+            "type": "string",
+            "description": "Free-form profile description text.",
+            "maxGraphemes": 256,
+            "maxLength": 2560
+          },
+          "website": { "type": "string", "format": "uri" },
+          "createdAt": { "type": "string", "format": "datetime" }
+        }
+      }
+    }
+  }
+}

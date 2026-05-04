@@ -1,0 +1,33 @@
+{
+  "lexicon": 1,
+  "id": "com.lognship.log.reaction",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A reaction to a log entry.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "value", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "The entry being reacted to."
+          },
+          "value": {
+            "type": "string",
+            "description": "The kind of reaction.",
+            "knownValues": ["like", "dislike"],
+            "maxGraphemes": 32,
+            "maxLength": 320
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

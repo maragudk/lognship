@@ -11,9 +11,9 @@
         "required": ["project", "url", "createdAt"],
         "properties": {
           "project": {
-            "type": "ref",
-            "ref": "com.atproto.repo.strongRef",
-            "description": "Strong reference to the lognship project this repo belongs to."
+            "type": "string",
+            "format": "at-uri",
+            "description": "AT URI of the lognship project this repo belongs to."
           },
           "url": {
             "type": "string",

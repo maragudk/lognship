@@ -8,8 +8,13 @@
       "key": "tid",
       "record": {
         "type": "object",
-        "required": ["text", "createdAt"],
+        "required": ["project", "text", "createdAt"],
         "properties": {
+          "project": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "AT URI of the lognship project this log entry belongs to."
+          },
           "text": {
             "type": "string",
             "description": "The primary log entry content."

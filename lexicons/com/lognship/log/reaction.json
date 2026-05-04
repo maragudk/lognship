@@ -24,7 +24,8 @@
           },
           "createdAt": {
             "type": "string",
-            "format": "datetime"
+            "format": "datetime",
+            "description": "Client-declared timestamp when this reaction was originally created."
           }
         }
       }

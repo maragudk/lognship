@@ -1,0 +1,33 @@
+{
+  "lexicon": 1,
+  "id": "com.lognship.log.label",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A label applied to a log entry.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "text", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "The entry being labeled."
+          },
+          "text": {
+            "type": "string",
+            "description": "The label text.",
+            "maxGraphemes": 32,
+            "maxLength": 320
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Client-declared timestamp when this label was originally applied."
+          }
+        }
+      }
+    }
+  }
+}

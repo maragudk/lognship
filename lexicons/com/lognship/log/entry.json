@@ -17,7 +17,9 @@
           },
           "text": {
             "type": "string",
-            "description": "The primary log entry content."
+            "description": "The primary log entry content.",
+            "maxGraphemes": 2048,
+            "maxLength": 20480
           },
           "createdAt": {
             "type": "string",

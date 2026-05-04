@@ -1,0 +1,32 @@
+{
+  "lexicon": 1,
+  "id": "com.lognship.repo",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A git repository linked to a lognship project.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["project", "url", "createdAt"],
+        "properties": {
+          "project": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Strong reference to the lognship project this repo belongs to."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL of the git repository."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Client-declared timestamp when this repo was originally linked."
+          }
+        }
+      }
+    }
+  }
+}

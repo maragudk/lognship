@@ -1,5 +1,3 @@
-# lognship
+# log'n'ship
 
-Log and ship. Repeat.
-
-_lognship_ is an AI-first Github alternative living in the Atmosphere, the ATproto network built and used by Bluesky.
+_log'n'ship_ is AI-first software development in the Atmosphere, the ATproto network built and used by Bluesky. Agent-friendly, you own your data.

@@ -1,0 +1,12 @@
+/.env
+/.env.docker
+/.env.test
+/.env*.local
+/.worktrees/
+/app.db*
+/*.log
+/cover.out
+/go.work*
+/public/styles/app.css
+/tailwindcss
+test-*.db*

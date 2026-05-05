@@ -1,0 +1,32 @@
+{
+  "lexicon": 1,
+  "id": "com.lognship.project.membership",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "Declare a membership of a project.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["project", "member", "createdAt"],
+        "properties": {
+          "project": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "AT URI of the lognship project this membership belongs to."
+          },
+          "member": {
+            "type": "string",
+            "format": "did",
+            "description": "DID of the member."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Client-declared timestamp when this membership was originally created."
+          }
+        }
+      }
+    }
+  }
+}

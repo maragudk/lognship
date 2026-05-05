@@ -25,6 +25,11 @@
             "type": "string",
             "format": "datetime",
             "description": "Client-declared timestamp when this log entry was originally created."
+          },
+          "facets": {
+            "type": "array",
+            "items": { "type": "ref", "ref": "com.lognship.richtext.facet" },
+            "description": "Annotations of byte ranges within the entry's text."
           }
         }
       }

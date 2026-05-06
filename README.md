@@ -1,5 +1,7 @@
 # log'n'ship
 
+<img src="logo.png" alt="Logo" width="300" align="right">
+
 _log'n'ship_ is AI-first software development in the Atmosphere, the ATproto network built and used by Bluesky. Agent-friendly, you own your data.
 
 Made with ✨sparkles✨ by [maragu](https://www.maragu.dev/): independent software consulting for cloud-native Go apps & AI engineering.

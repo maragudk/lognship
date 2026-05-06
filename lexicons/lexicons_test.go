@@ -14,8 +14,8 @@ func TestLexicons(t *testing.T) {
 	if err := cat.LoadDirectory("com"); err != nil {
 		t.Fatalf("loading lognship lexicons: %v", err)
 	}
-	if err := cat.LoadDirectory("testdata/external"); err != nil {
-		t.Fatalf("loading external (atproto-core) lexicons: %v", err)
+	if err := cat.LoadDirectory("testdata/com/atproto"); err != nil {
+		t.Fatalf("loading atproto-core lexicons: %v", err)
 	}
 
 	cases := []struct {

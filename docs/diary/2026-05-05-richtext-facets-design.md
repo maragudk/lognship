@@ -298,7 +298,7 @@ lexicons_test.go:15: loading lexicon catalog: unsupported lexicon language versi
 lexicons_test.go:80: expected valid, got error: schema not found in catalog: com.atproto.repo.strongRef#main
 ```
 
-The label lexicon's `subject` references `com.atproto.repo.strongRef`, which isn't in `com/lognship/`. Bundled a copy at `lexicons/testdata/external/com/atproto/repo/strongRef.json` (from indigo's vendored lexicons) and added a second `LoadDirectory("testdata/external")` call.
+The label lexicon's `subject` references `com.atproto.repo.strongRef`, which isn't in `com/lognship/`. Bundled a copy at `lexicons/testdata/com/atproto/repo/strongRef.json` (from indigo's vendored lexicons) and added a second `LoadDirectory("testdata/com/atproto")` call. Originally landed under `testdata/external/com/atproto/...`; Markus pushed back — the mirror-the-NSID convention should apply throughout `testdata/`, regardless of who owns the NSID. So the path is just `testdata/com/atproto/repo/strongRef.json`, and the test loader points at `testdata/com/atproto` to scope to atproto-core schemas without picking up our fixtures (which live under `testdata/com/lognship/...`).
 
 ### What I learned
 
@@ -308,11 +308,11 @@ Indigo doesn't expose the atproto-core lexicons as an importable embed.FS — th
 
 ### What was tricky
 
-Deciding where the third-party schema lives. `lexicons/com/atproto/repo/strongRef.json` would mix it with our own schemas and `goat lex publish` would try to publish it (it's not our NSID — disaster). `lexicons/testdata/external/...` keeps it explicitly third-party-and-test-only, the Makefile doesn't lint it, and our schemas don't see it. Network resolution via `ResolvingCatalog` was the third option — clean in concept, fragile in practice (network in tests = flaky in CI, slow offline). Picked the local-bundle path.
+Deciding where the third-party schema lives. Three options weighed: `lexicons/com/atproto/repo/strongRef.json` (mixed in with our schemas — bad, `goat lex publish` would try to ship it under an NSID we don't own); `lexicons/testdata/external/com/atproto/...` (clearly third-party-and-test-only); network resolution via `ResolvingCatalog` (no local copy, but flaky-in-CI). Picked the second initially, then Markus simplified — drop the `external/` partition since the NSID hierarchy already makes ownership obvious. Final path: `testdata/com/atproto/repo/strongRef.json`. Loader scopes to `testdata/com/atproto` so it doesn't pick up our fixtures under `testdata/com/lognship/...`.
 
 ### What warrants review
 
-The `lexicons/testdata/external/` path convention. If we add more atproto-core dependencies later (`com.atproto.label.defs` for a labeler integration, etc.), they pile up under the same directory. Worth confirming this is the home before it grows.
+If we add more atproto-core dependencies later (`com.atproto.label.defs` for a labeler integration, etc.), they go under `testdata/com/atproto/...` next to strongRef. The loader's `LoadDirectory("testdata/com/atproto")` will pick them up automatically. If a future dependency lives under a different top-level prefix (e.g. an `app.bsky.*` lexicon), we'd need a second `LoadDirectory` call for that prefix.
 
 The bundled `strongRef.json` is a snapshot of indigo's vendored copy as of indigo `v0.0.0-20260428083920-ce62b8fce9e0`. atproto's strongRef is genuinely frozen, so the staleness risk is theoretical — but if it ever evolves, our copy doesn't update automatically.
 

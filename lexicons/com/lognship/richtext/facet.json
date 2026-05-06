@@ -10,6 +10,7 @@
         "index": { "type": "ref", "ref": "#byteSlice" },
         "features": {
           "type": "array",
+          "minLength": 1,
           "items": {
             "type": "union",
             "refs": ["#mention", "#link", "#atLink"]

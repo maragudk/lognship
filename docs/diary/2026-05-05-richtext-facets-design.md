@@ -122,7 +122,7 @@ Updated `lexicons/com/lognship/log/entry.json` to add an optional `facets` prope
 
 Validated everything in two passes: `find lexicons -name '*.json' -print0 | xargs -0 goat lex parse` and the same with `goat lex lint`. Both came back clean across all eight lexicon files.
 
-Drafted the worked example from the brainstorm (an entry with a `#mention` of `@markus.maragu.dev` resolved to `did:plc:hfjv6h7kg43jey4tqyys7uzp`, plus an `#atLink` to another lognship entry) at `/tmp/lognship-records/log-entry-with-facets-example.json`. Hand-computed byte offsets — 15/33 for the mention, 44/118 for the AT URI. Ran `goat lex validate` and got `valid com.lognship.log.entry record`. Design holds end-to-end.
+Drafted the worked example from the brainstorm (an entry with a `#mention` of `@markus.maragu.dev` resolved to `did:plc:hfjv6h7kg43jey4tqyys7uzp`, plus an `#atLink` to another lognship entry) at `/tmp/lognship-records/log-entry-with-facets-example.json`. Hand-computed byte offsets — 15/33 for the mention, 44/118 for the AT URI. Ran `goat lex validate` and got `valid com.lognship.log.entry record`. *(See Step 4 for why this initial validation was misleading: without `--catalog lexicons`, the validator couldn't load the unpublished facet lexicon and silently passed the entire `facets` array unchecked. Step 4 re-runs validation with `-c lexicons` and confirms the design actually holds.)*
 
 ### Why
 
@@ -153,3 +153,63 @@ The `_lexicon.richtext.lognship.com` DNS TXT record doesn't exist yet — it's n
 ### Future work
 
 When ready: add the DNS TXT record at `_lexicon.richtext.lognship.com` pointing at the lognship DID, run `goat lex publish lexicons/`, confirm with `goat lex status`. After publication, the next chunk is a client that builds facets programmatically (parses prose, resolves handles, computes byte offsets per the section 4 spec from the brainstorm) and an app view that consumes them per the section 5 spec.
+
+## Step 4: Code review, triage, and tighten
+
+**Author:** main
+
+### Prompt Context
+
+**Verbatim prompt:** "Use your code review skill" / "/fabrik:address-code-review"
+**Interpretation:** Run two competing reviewer subagents over the branch, then walk through their findings one at a time per the address-code-review protocol — triage all comments before any code changes.
+**Inferred intent:** Catch what the implementation diary missed before publishing. Lexicons are write-once-evolve-only, so getting the wire format right pre-publication is much cheaper than after.
+
+### What I did
+
+Dispatched two parallel reviewers (`general-purpose` agent type) with a self-contained brief covering the design context, settled decisions to skip re-litigating, and the seven file/area review prompts. They returned independent reports; cross-referenced findings via the code-review skill's "consensus + serious single-reviewer" rule, surfacing six items.
+
+Triaged each comment one at a time per the address-code-review skill — strict no-edits-during-triage rule. Decisions:
+
+- **Skip:** documenting `byteEnd >= byteStart` invariant in the `byteSlice` description; capping the `facets` array with `maxLength`. Both can be added later if friction appears; not load-bearing now.
+- **Apply:** add `minLength: 1` to the `features` array (matches the `main` description's "one or more semantic features" and rejects meaningless empty-features facets); move the `facets` field to sit between `text` and `createdAt` in `com.lognship.log.entry` to match the project-wide convention of keeping `createdAt` last (verified across `label`, `reaction`, `project`, `actor/profile`, `project/membership`).
+- **Verify, then update:** the diary's "design holds end-to-end" claim, plus a contradicting reviewer claim about whether `format: "at-uri"` actually rejects malformed AT URIs.
+
+For the verification: built four probe records under `/tmp/lognship-records/strictness-test/` (garbage with spaces, `https://` shoved into `#atLink`, valid DID with malformed NSID, well-formed). Ran each through `goat lex validate` twice — without `--catalog` and with `-c lexicons`. Without the catalog, *all four passed* (validator silently skipped the unloadable union). With `-c lexicons`, the three malformed cases failed with precise errors (`AT-URI syntax didn't validate via regex`, `AT-URI first path segment not an NSID: badnsid`); only the well-formed AT URI passed. Reviewer B's reading was correct; the strict-validation justification for splitting `#link`/`#atLink` is real, not aspirational.
+
+After applying both edits and verifying empty-features now fails (`array length out of bounds: 0`), re-ran `goat lex parse`/`lint` over all eight lexicons (clean) and re-validated the worked example with `-c lexicons` (still valid).
+
+### Why
+
+The reviewers' job was to find what the implementation diary missed. Two competing reviewers + the consensus rule keeps the signal high without a single critic dominating. The `--catalog` finding was particularly load-bearing: the original Step 3's "design holds end-to-end" was an honest mistake (the validator failed silent rather than loud), and discovering it pre-publish means we never publish a lexicon whose strictness claims are unverified.
+
+### What worked
+
+The address-code-review skill's no-edits-during-triage rule prevented eager partial fixes that would have muddled the discussion. Walking through six items one at a time, with my recommendation paired against each one, kept Markus in the driver's seat — he skipped two I'd been inclined to apply and confirmed the other four cleanly. Cheap, fast, no surprises.
+
+The empirical reconciliation of the reviewer disagreement (probe records + before/after `--catalog` runs) settled the dispute in five minutes and produced concrete evidence either way. Better than re-reading the spec.
+
+### What didn't work
+
+The original Step 3 ran `goat lex validate` without `--catalog` and called the result "design holds end-to-end". That phrasing was wrong — the validator silently fell back to schema-less validation of the unpublished `com.lognship.richtext.facet` union, so reversed byte ranges, malformed AT URIs, invalid DIDs, and empty `features` arrays all returned `valid` cleanly. Recovering required the code review surfacing the gap; otherwise we'd have published lexicons whose strictness was untested.
+
+### What I learned
+
+`goat lex validate` without `--catalog` is misleadingly permissive when local-only lexicons are involved. It only checks against schemas it can resolve (network-fetchable, published) — the moment a record's `$type` (or any nested union) references an unpublished local lexicon, the validator silently skips that part rather than erroring. **Always pass `-c lexicons` for local lexicon work; treat anything else as smoke-testing only.**
+
+Format-level validation in `format: "at-uri"` is real — given the catalog, it enforces both AT URI grammar and NSID grammar on the path. The Bluesky-style strict format strings carry their weight.
+
+### What was tricky
+
+The reviewers disagreed on whether `format: "at-uri"` rejects malformed input even with `--catalog`. Reading their reports, both seemed plausible. Resolution required running the experiment myself — neither secondhand account would have been authoritative.
+
+Triage discipline. The temptation to "just fix the obvious one quickly" while discussing the next is real. The skill's strict separation of triage and implementation is annoying in the moment and clearly correct in retrospect — partial fixes during discussion would have left half-edited files when Markus then said "actually skip that one".
+
+### What warrants review
+
+The diary's Step 3 inline pointer to Step 4 (the parenthetical caveat) — keeps the historical narrative honest without rewriting the original entry. Acceptable but worth confirming the form is right.
+
+The `minLength: 1` constraint on `features`. With it, an unfortunate future feature-type addition that's the *only* feature on a facet would still validate fine — unions allow any single recognised type. The constraint catches "no features at all", which is the only meaningless case.
+
+### Future work
+
+Carry the `--catalog lexicons` habit into the publication runbook: before `goat lex publish`, validate any draft records against `-c lexicons` rather than the unfiltered `goat lex validate`. Add to the project's eventual contributor docs once they exist.

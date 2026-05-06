@@ -319,3 +319,49 @@ The bundled `strongRef.json` is a snapshot of indigo's vendored copy as of indig
 ### Future work
 
 Add fixtures for the remaining lexicons (`com.lognship.actor.profile`, `com.lognship.project`, `com.lognship.project.membership`, `com.lognship.repo`, `com.lognship.log.reaction`). Each should get at least one happy-path fixture and one or two invalid-path fixtures exercising constraints worth not regressing on. Once contributor docs exist, document the "drop a JSON under `testdata/`, add a row to the table" workflow.
+
+## Step 7: Sync with main, run the full suite, record the byteSlice-as-ref rationale
+
+**Author:** main
+
+### Prompt Context
+
+**Verbatim prompt:** "Merge origin/main" / "Run all tests"
+**Interpretation:** Bring the feature branch in sync with main before any further review/merge work, and confirm nothing on the branch breaks the project's broader tests (not just our own lexicon tests).
+**Inferred intent:** Limit the eventual merge-back surface to what the branch actually adds (lexicon facets + tests), and catch anything that would only fail outside the `lexicons/` package.
+
+### What I did
+
+Fetched origin and merged `origin/main` into `richtext-facets`. Two new commits on main since the branch diverged: `025f5cb` (lognship front page work) and `0f30f35` (Makefile target pushing to a temporary local container registry). Merge auto-resolved via the ort strategy — the only file both sides touched was the Makefile. Main added `push-docker` and `setup-docker-context` targets and renamed `APP_NAME ?= app` to `APP_NAME ?= lognship`; we'd scoped the lint target's `find` from `lexicons` to `lexicons/com/lognship`. Both kept. Merge landed at `609ba56`, pushed.
+
+Then ran `make test`, which brings up `versitygw-test` via docker compose and runs `go test -tags sqlite_fts5,sqlite_math_functions -coverprofile cover.out -shuffle on ./...`. Three packages reported in: `app/lexicons` (our 7 cases), `app/sqlite` (36.4% coverage), `app/sqlitetest` (66.7%). Other packages have no test files — template defaults. No regressions. `make test-down` torn down afterward.
+
+Separately, Markus asked why `byteSlice` is a separate `#byteSlice` ref rather than inlined into the facet's `index` field. We agreed to leave it split. The reasoning is worth recording so the question doesn't reopen: it mirrors `app.bsky.richtext.facet#byteSlice`, which we deliberately preserved when forking. The named-def form generates *named* types in any future Go/TS codegen (vs. anonymous nested structs), which is friendlier for writing helpers and asserting in tests. Reusability isn't a real argument — only `main` references `byteSlice` today and same in Bluesky's source. The split is about codegen and readability, not validation strength.
+
+### Why
+
+Merging main early shrinks any future review-and-land path: nobody has to mentally subtract front-page or docker-target drift from the diff. Running `make test` rather than just `go test ./lexicons/...` confirmed the docker-bound sqlite tests still pass — a path our lexicon work didn't directly touch but could have broken via go.mod or other dependency changes from adding indigo.
+
+### What worked
+
+Auto-merge handled the Makefile cleanly — main and the branch each modified non-overlapping lines. No manual conflict resolution. `make test` finished fast (under 30 seconds end-to-end including docker compose up). The cached `app/lexicons` result on the second test run confirmed Go's test cache is working as expected — fixtures + test code unchanged means no re-execution.
+
+### What didn't work
+
+Nothing — operational step. Both the merge and the test run were uneventful.
+
+### What I learned
+
+The lognship Makefile's `APP_NAME ?= app` was changed to `APP_NAME ?= lognship` on main since the template merge. So the `feedback_app_db_naming.md` memory needs scoping clarification: `app.db` (the SQLite filename) is always `app.db`, but `APP_NAME` and the wider set of template-default identifiers do get renamed per project. Worth tightening the memory rather than letting it claim more than it should.
+
+### What was tricky
+
+Nothing difficult. The non-news is itself useful — the branch's footprint is narrow enough that bringing main in is a non-event.
+
+### What warrants review
+
+Merge commit `609ba56` itself. The auto-merged Makefile keeps both main's new targets and our scoped `find`; eyeballing it confirms both sides are present in the final shape.
+
+### Future work
+
+Tighten `feedback_app_db_naming.md` to clarify that the rule covers the SQLite filename specifically — Markus does rename other template-default identifiers like `APP_NAME` per project (lognship is now `APP_NAME ?= lognship`). Avoids the memory over-applying next time.

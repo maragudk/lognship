@@ -35,10 +35,10 @@ func Page(props PageProps, body ...Node) Node {
 			Link(Rel("stylesheet"), Href(appCSSPath)),
 			Script(Type("module"), Src(datastarJSPath), Defer()),
 			Script(Src(appJSPath), Defer()),
-			Script(Src("https://cdn.usefathom.com/script.js"), Data("site", "123"), Defer()),
-			html.FavIcons("app"),
+			Script(Src("https://cdn.usefathom.com/script.js"), Data("site", "FIRHULCJ"), Defer()),
+			html.FavIcons("lognship"),
 		},
-		Body: []Node{Class("bg-primary-600 text-gray-900 dark:text-white"),
+		Body: []Node{Class("bg-primary-600 text-gray-900 dark:text-white font-mono"),
 			Div(Class("min-h-dvh flex flex-col justify-between"),
 				header(props),
 				Div(Class("grow bg-white dark:bg-gray-800 h-auto"),
@@ -64,15 +64,15 @@ func footer() Node {
 	return Div(
 		container(false,
 			Div(Class("flex items-center justify-center space-x-4 sm:space-x-8 py-2"),
-				data.Init("$counter = 0"), data.OnInterval("$counter++"),
-				a(Href("https://www.maragu.dev"), Text("by maragu "), Span(data.Text("$counter"))),
+				data.Init("$counter = 0"),
+				a(Href("https://www.maragu.dev"), Text("by maragu")),
 			),
 		),
 	)
 }
 
 func a(children ...Node) Node {
-	return A(Class("text-primary-600 hover:text-primary-400 dark:text-white dark:hover:text-gray-700"), Group(children))
+	return A(JoinAttrs("class", Class("text-primary-600 hover:text-primary-400 dark:text-white dark:hover:text-gray-700"), Group(children)))
 }
 
 func container(padY bool, children ...Node) Node {

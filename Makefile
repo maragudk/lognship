@@ -1,6 +1,6 @@
 -include .env
 
-APP_NAME ?= app
+APP_NAME ?= lognship
 DATABASE_PATH ?= app.db
 
 .PHONY: benchmark
@@ -9,7 +9,7 @@ benchmark:
 
 .PHONY: build-docker
 build-docker:
-	docker build --platform linux/arm64 -t $(APP_NAME) .
+	docker build --platform linux/arm64,linux/amd64 -t $(APP_NAME) .
 
 .PHONY: clean-all
 clean-all: down

@@ -1,6 +1,6 @@
 -include .env
 
-APP_NAME ?= app
+APP_NAME ?= lognship
 DATABASE_PATH ?= app.db
 
 .PHONY: benchmark
@@ -9,7 +9,7 @@ benchmark:
 
 .PHONY: build-docker
 build-docker:
-	docker build --platform linux/arm64 -t $(APP_NAME) .
+	docker build --platform linux/arm64,linux/amd64 -t $(APP_NAME) .
 
 .PHONY: clean-all
 clean-all: down
@@ -37,6 +37,14 @@ lint:
 	golangci-lint run
 	find lexicons/com/lognship -name '*.json' -print0 | xargs -0 goat lex parse
 	find lexicons/com/lognship -name '*.json' -print0 | xargs -0 goat lex lint
+
+.PHONY: push-docker
+push-docker:
+	docker --context server0 build --push -t localhost:5000/$(APP_NAME):latest -t localhost:5000/$(APP_NAME):$(shell git rev-parse HEAD) .
+
+.PHONY: setup-docker-context
+setup-docker-context:
+	docker context create server0 --docker "host=ssh://server0"
 
 tailwindcss:
 	curl -sfL -o tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-arm64

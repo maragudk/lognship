@@ -1,0 +1,12 @@
+{
+  "$type": "com.lognship.log.entry",
+  "project": "at://did:plc:ln7l376244zkvhwu4wgr3rzz/com.lognship.project/3mkzclpilfo2v",
+  "text": "regrettably attached a facet that means nothing",
+  "facets": [
+    {
+      "index": { "byteStart": 0, "byteEnd": 12 },
+      "features": []
+    }
+  ],
+  "createdAt": "2026-05-06T10:00:00Z"
+}

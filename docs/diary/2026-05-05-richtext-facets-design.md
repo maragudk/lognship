@@ -257,3 +257,65 @@ Nothing changed in code; the diary entry is the only artefact.
 ### Future work
 
 If a future feature type wants more invariants the schema can't express, the answer will be the same — schema gives single-field bounds, relationships live in client/renderer convention. Worth recording in contributor docs once those exist.
+
+## Step 6: Lexicon unit tests
+
+**Author:** main
+
+### Prompt Context
+
+**Verbatim prompt:** "I'd like to add a sort of unit testing to the lexicons. Where we can test happy paths and test cases that should fail validation. Is there precedence for how to do this, or should we just hook into Go's testing framework? I'm sure the goat command has an underlying library we can use. Launch a subagent to investigate."
+**Interpretation:** Stand up a Go test file that loads the lexicon catalog and validates fixture records against it, asserting per-fixture expected outcomes.
+**Inferred intent:** Catch regressions during lexicon evolution. The constraints we added in Step 4 (`minLength: 1`, `format: "at-uri"` strictness) need tests so they don't silently slip away later.
+
+### What I did
+
+Dispatched an Explore subagent to investigate atproto's lexicon-testing patterns. Came back with the indigo public Go API: `github.com/bluesky-social/indigo/atproto/lexicon`'s `BaseCatalog.LoadDirectory()` + `ValidateRecord()` are the underlying primitives `goat lex validate -c lexicons` calls.
+
+Markus proposed the layout: single `lexicons/lexicons_test.go` with table-driven tests; each row a `(name, file, valid bool)`. Fixtures live in `lexicons/testdata/` mirroring the lexicon path hierarchy (`lexicons/testdata/com/lognship/log/entry/<case>.json`). The fixture's own `$type` declares which lexicon it's tested against; the test extracts that and calls `ValidateRecord`.
+
+Wrote the test plus seven starter fixtures: five for `com.lognship.log.entry` (minimal valid; with-facets valid; missing-text invalid; empty-features invalid exercising Step 4's `minLength: 1`; malformed at-uri in atLink invalid exercising `format: "at-uri"` strictness) and two for `com.lognship.log.label` (minimal valid; missing-subject invalid). Updated the Makefile's `lint` target to scope `find` from `lexicons` to `lexicons/com/lognship` so `goat lex parse|lint` doesn't try to lint test fixtures as schemas.
+
+### Why
+
+Tests pin the constraints we just added in Steps 3–5 so they don't drift away unnoticed. `go test` runs them on every push; `make test` will pick them up automatically once it's used. The mirror-the-NSID-path fixture layout reads naturally and scales as more lexicons get coverage — file path tells you exactly what's being tested before you open the file.
+
+### What worked
+
+The whole loop was about 20 minutes from "what's the API" to all-green. Indigo's API is exactly the right shape — the same primitives `goat lex validate` uses are the ones we hook into for tests, no extra abstraction. Markus's table-driven layout collapsed the design question; explicit case names like "log entry: empty features array on a facet" surface directly in `t.Run` output when something fails.
+
+### What didn't work
+
+Two failures along the way, both from catalog setup:
+
+```
+lexicons_test.go:15: loading lexicon catalog: unsupported lexicon language version: 0
+```
+
+`BaseCatalog.LoadDirectory(".")` walked into `testdata/` and tried to parse fixtures as lexicons. Fixed by pointing it at `com/` (where the schemas actually live) and adding a separate load for external dependencies.
+
+```
+lexicons_test.go:80: expected valid, got error: schema not found in catalog: com.atproto.repo.strongRef#main
+```
+
+The label lexicon's `subject` references `com.atproto.repo.strongRef`, which isn't in `com/lognship/`. Bundled a copy at `lexicons/testdata/external/com/atproto/repo/strongRef.json` (from indigo's vendored lexicons) and added a second `LoadDirectory("testdata/external")` call.
+
+### What I learned
+
+`BaseCatalog.LoadDirectory` doesn't honour Go's `testdata/` exclusion convention — it walks any directory you point it at. Schema data and test data have to be physically separated.
+
+Indigo doesn't expose the atproto-core lexicons as an importable embed.FS — they live under `lexicons/com/atproto/...` in the indigo module but aren't reachable as a Go package's embed. So lognship lexicons that reference atproto-core types (like `strongRef`) need a local copy in the test catalog. One-time cost per referenced atproto-core lexicon.
+
+### What was tricky
+
+Deciding where the third-party schema lives. `lexicons/com/atproto/repo/strongRef.json` would mix it with our own schemas and `goat lex publish` would try to publish it (it's not our NSID — disaster). `lexicons/testdata/external/...` keeps it explicitly third-party-and-test-only, the Makefile doesn't lint it, and our schemas don't see it. Network resolution via `ResolvingCatalog` was the third option — clean in concept, fragile in practice (network in tests = flaky in CI, slow offline). Picked the local-bundle path.
+
+### What warrants review
+
+The `lexicons/testdata/external/` path convention. If we add more atproto-core dependencies later (`com.atproto.label.defs` for a labeler integration, etc.), they pile up under the same directory. Worth confirming this is the home before it grows.
+
+The bundled `strongRef.json` is a snapshot of indigo's vendored copy as of indigo `v0.0.0-20260428083920-ce62b8fce9e0`. atproto's strongRef is genuinely frozen, so the staleness risk is theoretical — but if it ever evolves, our copy doesn't update automatically.
+
+### Future work
+
+Add fixtures for the remaining lexicons (`com.lognship.actor.profile`, `com.lognship.project`, `com.lognship.project.membership`, `com.lognship.repo`, `com.lognship.log.reaction`). Each should get at least one happy-path fixture and one or two invalid-path fixtures exercising constraints worth not regressing on. Once contributor docs exist, document the "drop a JSON under `testdata/`, add a row to the table" workflow.

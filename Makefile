@@ -35,8 +35,8 @@ fmt:
 .PHONY: lint
 lint:
 	golangci-lint run
-	find lexicons -name '*.json' -print0 | xargs -0 goat lex parse
-	find lexicons -name '*.json' -print0 | xargs -0 goat lex lint
+	find lexicons/com/lognship -name '*.json' -print0 | xargs -0 goat lex parse
+	find lexicons/com/lognship -name '*.json' -print0 | xargs -0 goat lex lint
 
 tailwindcss:
 	curl -sfL -o tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-arm64

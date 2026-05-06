@@ -1,0 +1,9 @@
+{
+  "$type": "com.lognship.log.label",
+  "subject": {
+    "uri": "at://did:plc:ccrzw4q3x5cknyo5uqsti74x/com.lognship.log.entry/3ml444yzezs2f",
+    "cid": "bafyreigq6agbrhfsc3l4vor2yksipvwdgsh4hi2lmf32wuqotzcaazcnvi"
+  },
+  "text": "task",
+  "createdAt": "2026-05-06T10:00:00Z"
+}

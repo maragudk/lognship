@@ -66,6 +66,38 @@ Breakpoints:
   --font-mono--font-feature-settings: "liga" 1, "calt" 1;
 }
 
+@theme {
+  --animate-wave-slow: wave-drift 55s linear infinite alternate;
+  --animate-wave-slow-reverse: wave-drift 48s linear infinite alternate-reverse;
+  --animate-wave-medium: wave-drift 38s linear infinite alternate-reverse;
+  --animate-wave-medium-forward: wave-drift 34s linear infinite alternate;
+  --animate-wave-fast: wave-drift 26s linear infinite alternate;
+  --animate-wave-fast-reverse: wave-drift 22s linear infinite alternate-reverse;
+  --animate-bob: bob 6s ease-in-out infinite alternate;
+}
+
+@keyframes wave-drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes bob {
+  from { transform: translateY(-0.5rem); }
+  to { transform: translateY(0.5rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-wave-slow,
+  .animate-wave-slow-reverse,
+  .animate-wave-medium,
+  .animate-wave-medium-forward,
+  .animate-wave-fast,
+  .animate-wave-fast-reverse,
+  .animate-bob {
+    animation: none;
+  }
+}
+
 @theme inline {
   --color-primary-50: var(--color-pink-50);
   --color-primary-100: var(--color-pink-100);

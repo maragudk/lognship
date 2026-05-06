@@ -21,7 +21,7 @@ func HomePage(props HomePageProps) Node {
 				P(a(Class("sm:text-xl"), Href("https://bsky.app/profile/lognship.com"), Text("Follow updates on Bluesky"))),
 				P(a(Class("sm:text-xl"), Href("https://pdsls.dev/at://did:plc:ln7l376244zkvhwu4wgr3rzz"), Text("See schemas and more on PDSls.dev"))),
 			),
-			Img(Src("/images/logo.png"), Alt("log’n’ship logo"), Class("w-48 sm:w-64 shrink-0 mx-auto sm:mx-0")),
+			Img(Src("/images/logo.png"), Alt("log’n’ship logo"), Class("w-48 sm:w-64 shrink-0 mx-auto sm:mx-0 animate-bob")),
 		),
 	)
 }

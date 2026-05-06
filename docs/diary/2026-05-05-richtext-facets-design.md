@@ -213,3 +213,47 @@ The `minLength: 1` constraint on `features`. With it, an unfortunate future feat
 ### Future work
 
 Carry the `--catalog lexicons` habit into the publication runbook: before `goat lex publish`, validate any draft records against `-c lexicons` rather than the unfiltered `goat lex validate`. Add to the project's eventual contributor docs once they exist.
+
+## Step 5: Can we enforce `byteEnd > byteStart` in the schema?
+
+**Author:** main
+
+### Prompt Context
+
+**Verbatim prompt:** "Can we enforce byteEnd > byteStart in the schema?"
+**Interpretation:** Re-open Reviewer A's original concern (the one we skipped during triage) — is there a lexicon mechanism we missed?
+**Inferred intent:** Get a clear answer on the limit of atproto's lexicon expressiveness so future "can we enforce X" questions don't keep re-litigating this.
+
+### What I did
+
+Surveyed atproto's lexicon expressiveness. Single-field constraints supported: `minimum`/`maximum` on integers, `minLength`/`maxLength` on arrays, `enum`, `const`, `default`, plus the type-specific `format` strings (`did`, `nsid`, `uri`, `at-uri`, etc.). What's *not* supported: any cross-field relationship — no `dependentSchemas`, no `if/then/else`, no expressions over multiple fields. atproto's data model is a deliberately small subset of JSON Schema designed to keep validation portable.
+
+Surfaced two workarounds: (A) reshape `byteSlice` to `{byteStart, byteLength}` with `byteLength: minimum: 1`, which converts the cross-field invariant into a single-field constraint; (B) document the invariant in `byteSlice.description` — the option Reviewer A originally raised, soft-contract only. Markus took option C: "no action".
+
+### Why
+
+The code review had surfaced the gap; the question deserved a definitive answer rather than a half-remembered "I think it can't be done". Now if it comes up again, the answer is recorded.
+
+### What worked
+
+Direct answer with both workarounds plus my recommendation (no action) let the question close in two turns. Option A is the only schema-side fix and trades away Bluesky-shape parity, which we deliberately preserved during the brainstorm — not a swap I wanted to propose seriously.
+
+### What didn't work
+
+Nothing — small research question, clean answer.
+
+### What I learned
+
+atproto lexicons enforce only single-field constraints. Anything that depends on one field's value relative to another (consistency, derived equality, ordering) lives in client-and-renderer convention, not the schema. Worth noting as a recurring pattern: every time the question "can we enforce X" comes up, if X involves two or more fields, the answer is no by construction. The escape hatch is always to reshape the data so the invariant becomes a single-field property — sometimes worth it, often not.
+
+### What was tricky
+
+Resisting the temptation to propose option A as a clever fix. Bluesky-shape parity was load-bearing during the brainstorm; it shouldn't get sacrificed for one invariant after the fact.
+
+### What warrants review
+
+Nothing changed in code; the diary entry is the only artefact.
+
+### Future work
+
+If a future feature type wants more invariants the schema can't express, the answer will be the same — schema gives single-field bounds, relationships live in client/renderer convention. Worth recording in contributor docs once those exist.

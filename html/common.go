@@ -55,7 +55,7 @@ func Page(props PageProps, body ...Node) Node {
 }
 
 func header(_ PageProps) Node {
-	return Div(
+	return Div(Class("min-h-8 bg-primary-600"),
 		container(false),
 	)
 }

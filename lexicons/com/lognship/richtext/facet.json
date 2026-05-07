@@ -1,0 +1,55 @@
+{
+  "lexicon": 1,
+  "id": "com.lognship.richtext.facet",
+  "defs": {
+    "main": {
+      "type": "object",
+      "description": "Annotation of a sub-string within a host record's text. Holds a byte range and one or more semantic features describing what the range means.",
+      "required": ["index", "features"],
+      "properties": {
+        "index": { "type": "ref", "ref": "#byteSlice" },
+        "features": {
+          "type": "array",
+          "minLength": 1,
+          "items": {
+            "type": "union",
+            "refs": ["#mention", "#link", "#atLink"]
+          }
+        }
+      }
+    },
+    "mention": {
+      "type": "object",
+      "description": "Facet feature for a mention of an atproto account by DID. The visible handle in the host record's text is informational; the DID is the canonical reference and survives handle migrations.",
+      "required": ["did"],
+      "properties": {
+        "did": { "type": "string", "format": "did" }
+      }
+    },
+    "link": {
+      "type": "object",
+      "description": "Facet feature for any non-AT URI link (https://, mailto:, etc.). For AT URIs, prefer atLink instead so the lexicon validator and the PDS enforce strict at-uri syntax at write time.",
+      "required": ["uri"],
+      "properties": {
+        "uri": { "type": "string", "format": "uri" }
+      }
+    },
+    "atLink": {
+      "type": "object",
+      "description": "Facet feature for a link to an atproto record (at:// URI). The authority should be normalised to DID form at write time so handle migrations don't break the reference.",
+      "required": ["uri"],
+      "properties": {
+        "uri": { "type": "string", "format": "at-uri" }
+      }
+    },
+    "byteSlice": {
+      "type": "object",
+      "description": "The sub-string range a facet is active for. Indices are UTF-8 byte offsets into the host record's text; byteStart is inclusive, byteEnd is exclusive.",
+      "required": ["byteStart", "byteEnd"],
+      "properties": {
+        "byteStart": { "type": "integer", "minimum": 0 },
+        "byteEnd": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

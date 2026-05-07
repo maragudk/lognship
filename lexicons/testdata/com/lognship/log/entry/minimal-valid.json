@@ -1,0 +1,6 @@
+{
+  "$type": "com.lognship.log.entry",
+  "project": "at://did:plc:ln7l376244zkvhwu4wgr3rzz/com.lognship.project/3mkzclpilfo2v",
+  "text": "wrote my first lognship test fixture, narrowly avoided naming it foo",
+  "createdAt": "2026-05-06T10:00:00Z"
+}

@@ -21,6 +21,11 @@
             "maxGraphemes": 2048,
             "maxLength": 20480
           },
+          "facets": {
+            "type": "array",
+            "items": { "type": "ref", "ref": "com.lognship.richtext.facet" },
+            "description": "Annotations of byte ranges within the entry's text."
+          },
           "createdAt": {
             "type": "string",
             "format": "datetime",

@@ -18,7 +18,7 @@
           "value": {
             "type": "string",
             "description": "The kind of reaction.",
-            "knownValues": ["like", "dislike"],
+            "knownValues": ["like", "dislike", "looking", "celebrate", "support"],
             "maxGraphemes": 32,
             "maxLength": 320
           },

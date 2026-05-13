@@ -6,6 +6,7 @@
 /app.db*
 /*.log
 /cover.out
+/data/
 /go.work*
 /public/styles/app.css
 /tailwindcss

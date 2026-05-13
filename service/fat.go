@@ -6,27 +6,23 @@ import (
 	"context"
 
 	"maragu.dev/glue/email/postmark"
-	"maragu.dev/glue/s3"
 
 	"app/model"
 	"app/sqlite"
 )
 
 type Fat struct {
-	bucket *s3.Bucket
 	db     *sqlite.Database
 	sender *postmark.Sender
 }
 
 type NewFatOptions struct {
-	Bucket *s3.Bucket
 	Database *sqlite.Database
 	Sender *postmark.Sender
 }
 
 func NewFat(opts NewFatOptions) *Fat {
 	return &Fat{
-		bucket: opts.Bucket,
 		db:     opts.Database,
 		sender: opts.Sender,
 	}

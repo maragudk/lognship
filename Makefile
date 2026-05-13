@@ -13,7 +13,6 @@ build-docker:
 
 .PHONY: clean-all
 clean-all: down
-	docker volume rm $(APP_NAME)_versitygw
 	rm -f $(DATABASE_PATH) $(DATABASE_PATH)-wal $(DATABASE_PATH)-shm
 
 .PHONY: cover
@@ -26,7 +25,7 @@ deps:
 
 .PHONY: down
 down:
-	@docker compose down versitygw
+	@docker compose down
 
 .PHONY: fmt
 fmt:
@@ -51,20 +50,12 @@ tailwindcss:
 	chmod a+x tailwindcss
 
 .PHONY: test
-test: test-up
+test:
 	go test -tags sqlite_fts5,sqlite_math_functions -coverprofile cover.out -shuffle on ./...
-
-.PHONY: test-down
-test-down:
-	docker compose down versitygw-test
-
-.PHONY: test-up
-test-up:
-	docker compose up -d versitygw-test
 
 .PHONY: up
 up:
-	docker compose up -d versitygw
+	docker compose up -d
 
 .PHONY: watch
 watch: tailwindcss
